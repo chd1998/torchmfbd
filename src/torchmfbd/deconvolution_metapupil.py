@@ -191,7 +191,7 @@ class DeconvolutionMetapupils(Deconvolution):
         self.logger.info(f" ********************************************************")
 
         # Combine all frames
-        self.frames_apodized, self.diversity, self.init_frame_diversity, self.sigma = self.combine_frames()
+        self.frames_apodized, self.diversity, self.init_frame_diversity, self.sigma, self.plane = self.combine_frames()
         
         # Define metapupils and associated basis according to the number of modes
         self.define_metapupils()
@@ -254,13 +254,17 @@ class DeconvolutionMetapupils(Deconvolution):
         # first order/Second order optimizer
         parameters = [{'params': modes, 'lr': self.lr_modes}]
 
-        if optimizer == 'second':
+        if optimizer == 'lbfgs':
             self.logger.info(f"Using LBFGS optimizer...")
             opt = torch.optim.LBFGS(parameters, lr=0.01)
-        else:
+        if optimizer == 'adam':
             self.logger.info(f"Using Adam optimizer...")
             opt = torch.optim.Adam(parameters)
+        if optimizer == 'adamw':
+            self.logger.info(f"Using AdamW optimizer...")
+            opt = torch.optim.AdamW(parameters)
 
+        
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, 3*n_iterations)
 
         losses = torch.zeros(n_iterations, device=self.device)
@@ -304,12 +308,14 @@ class DeconvolutionMetapupils(Deconvolution):
             for i_seq, seq in enumerate(ind):
                 
                 frames_apodized_seq = []
+                plane_seq = []
                 frames_ft = []
                 sigma_seq = []
                 diversity_seq = []
                 projection_seq = []
                 for i in range(self.n_o):
                     frames_apodized_seq.append(self.frames_apodized[i][seq, ...])
+                    plane_seq.append(self.plane[i][seq, ...].to(self.device))
                     frames_ft.append(torch.fft.fft2(self.frames_apodized[i][seq, ...]))
                     sigma_seq.append(self.sigma[i][seq, ...])
                     diversity_seq.append(self.diversity[i][seq, ...].to(self.device))
@@ -331,7 +337,7 @@ class DeconvolutionMetapupils(Deconvolution):
                 psf, psf_ft = self.compute_psfs(modes, n_active, projection_seq, diversity_seq)
                 
                 if self.show_object_info or loop == n_iterations - 1:
-                    obj_ft, obj_filter_ft, obj_filter = self.compute_object(frames_ft, psf_ft, sigma_seq)                        
+                    obj_ft, obj_filter_ft, obj_filter = self.compute_object(frames_ft, psf_ft, sigma_seq, plane_seq)                        
 
                 loss_mse = torch.tensor(0.0).to(self.device)
 

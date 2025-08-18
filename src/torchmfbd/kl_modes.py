@@ -16,12 +16,12 @@ def _zernike_parity( j, jp):
 class KL(object):
 
     def __init__(self):        
-        f = pkgutil.get_data(__package__, 'kl/kl_data.npy')
+        f = pkgutil.get_data(__package__, 'kl/kl_data_npy')
         tmp = np.load(BytesIO(f))        
         self.noll_KL = tmp[:,0].astype('int')
         self.noll_Z = tmp[:,1].astype('int')
         self.cz = tmp[:,2]
-        f = pkgutil.get_data(__package__, 'kl/KL_variance.npy')
+        f = pkgutil.get_data(__package__, 'kl/KL_variance_npy')
         self.KL_variance = np.load(BytesIO(f))
 
         self.logger = logging.getLogger("modes")

@@ -34,20 +34,6 @@ if __name__ == '__main__':
     
     decSI = torchmfbd.DeconvolutionMetapupils('kl_meta.yaml')
 
-    # x = 1.0 * torch.arange(nx) - nx // 2
-    # y = 1.0 * torch.arange(ny) - ny // 2
-    # X, Y = torch.meshgrid(x, y, indexing='ij')
-    # outX = patchify.patchify(X[None, None, :, :], patch_size=64, stride_size=50, flatten_sequences=True)
-    # outY = patchify.patchify(Y[None, None, :, :], patch_size=64, stride_size=50, flatten_sequences=True)
-
-    # patchX = torch.mean(outX, dim=(-1, -2))[:, 0]
-    # patchY = torch.mean(outY, dim=(-1, -2))[:, 0]
-    
-    # X, Y = torch.meshgrid(patchX, patchY)
-    # R = torch.sqrt(X**2 + Y**2)
-
-    # breakpoint()
-
     # Patchify and add the frames
     for i in range(2):        
         frames_patches, XY = patchify.patchify(frames[:, i, :, :, :], patch_size=64, stride_size=50, flatten_sequences=True, return_coordinates=True)
@@ -56,9 +42,9 @@ if __name__ == '__main__':
     # decSI.plot_metapupils()
 
     decSI.deconvolve(infer_object=False, 
-                     optimizer='first', 
+                     optimizer='adam', 
                      simultaneous_sequences=81,
-                     n_iterations=100)
+                     n_iterations=250)
         
     
     obj = []

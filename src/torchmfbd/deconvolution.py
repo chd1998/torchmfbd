@@ -1021,8 +1021,12 @@ class Deconvolution(object):
                 diversity_seq.append(self.diversity[i][seq, ...].to(self.device))
                 
             n_seq = len(seq)
-                                                            
-            psf, psf_ft = self.compute_psfs(self.modes_seq[i_seq], diversity_seq)
+
+            if self.psf_model.lower() in ['zernike', 'kl']:
+                psf, psf_ft = self.compute_psfs(self.modes_seq[i_seq], diversity_seq)
+            
+            if self.psf_model.lower() == 'nmf':
+                psf, psf_ft = self.compute_psfs_nmf(self.modes_seq[i_seq])
             
             if (self.infer_object):
 
@@ -1336,7 +1340,7 @@ class Deconvolution(object):
                 self.logger.info(f"Using Adam optimizer...")
                 opt = torch.optim.Adam(parameters)
             if optimizer == 'adamw':
-                self.logger.info(f"Using Adam optimizer...")
+                self.logger.info(f"Using AdamW optimizer...")
                 opt = torch.optim.AdamW(parameters)
             if optimizer == 'cg':
                 if NGC_OPTIMIZER:

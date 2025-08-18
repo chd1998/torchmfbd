@@ -297,10 +297,33 @@ def orthogonalize(basis, pupil):
     return Q
 
 if __name__ == "__main__":
-    x = np.random.rand(256, 256)
-    k, pp = azimuthal_power(x, d=1, angles=[45, -45, 135, -135], range_angles=45)
-    k2, pp2 = azimuthal_power(x, d=1)
+    # x = np.random.rand(256, 256)
+    # k, pp = azimuthal_power(x, d=1, angles=[45, -45, 135, -135], range_angles=45)
+    # k2, pp2 = azimuthal_power(x, d=1)
 
-    import matplotlib.pyplot as plt
-    plt.loglog(k, pp, label='Azimuthal Power Spectrum')
-    plt.loglog(k2, pp2, label='Azimuthal Power Spectrum (all angles)')
+    # import matplotlib.pyplot as plt
+    # plt.loglog(k, pp, label='Azimuthal Power Spectrum')
+    # plt.loglog(k2, pp2, label='Azimuthal Power Spectrum (all angles)')
+
+    z = np.array([0.0, 10.0, 20.0])  # Heights in km
+    n_modes_0 = 44.0
+    r00 = 5.0  # Fried parameter at reference height in cm
+    r0z = np.array([5.0, 10.0, 15.0])  # Fried parameters at different heights in cm
+    D = 100.0  # Aperture diameter in cm
+    afov = 512 * 0.059  # Angular field of view in arcsec
+    n_modes = num_modes_height(z, n_modes_0, r00, r0z, D, afov)
+
+    print(n_modes)
+    print((afov/3.0)**2/np.sum(n_modes/n_modes_0))
+
+    z = np.array([0.0, 20.0])  # Heights in km
+    n_modes_0 = 44.0
+    r00 = 10.0  # Fried parameter at reference height in cm
+    r0z = np.array([10.0, 35.0])  # Fried parameters at different heights in cm
+    D = 100.0  # Aperture diameter in cm
+    afov = 2.0 * 60. #256 * 0.059  # Angular field of view in arcsec
+    n_modes = num_modes_height(z, n_modes_0, r00, r0z, D, afov)
+
+    print(n_modes)
+
+    print((afov/3.0)**2/np.sum(n_modes/n_modes_0))
